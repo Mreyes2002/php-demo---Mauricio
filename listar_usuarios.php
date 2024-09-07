@@ -1,11 +1,11 @@
 <?php 
+    include('conexion.php');
     include('usuario.php');
+    
     $usuario = new Usuario($conexion);
     $usuarios = $usuario->listarUsuarios();
     $title = "Lista usuarios";
     include 'header.php';
-    
-
 ?>
 
 <div class="container mt-5">
@@ -14,6 +14,12 @@
             <h1>Lista de Usuarios</h1>
         </div>
         <div class="card-body">
+            <?php
+            // Mostrar mensaje si está presente en la URL
+            if (isset($_GET['message'])) {
+                echo '<div class="alert alert-info">' . htmlspecialchars($_GET['message']) . '</div>';
+            }
+            ?>
             <table class="table table-bordered table-hover">
                 <thead class="thead-dark">
                     <tr>
@@ -27,13 +33,13 @@
                 <tbody>
                     <?php foreach ($usuarios as $usuario) { ?>
                     <tr>
-                        <td><?php echo $usuario['id']; ?></td>
-                        <td><?php echo $usuario['nombre']; ?></td>
-                        <td><?php echo $usuario['direccion']; ?></td>
-                        <td><?php echo $usuario['telefono']; ?></td>
+                        <td><?php echo htmlspecialchars($usuario['id']); ?></td>
+                        <td><?php echo htmlspecialchars($usuario['nombre']); ?></td>
+                        <td><?php echo htmlspecialchars($usuario['direccion']); ?></td>
+                        <td><?php echo htmlspecialchars($usuario['telefono']); ?></td>
                         <td>
-                            <a href="editar_usuario.php?id=<?php echo $usuario['id']; ?>" class="btn btn-sm btn-warning">Editar</a>
-                            <a href="eliminar_usuario.php?id=<?php echo $usuario['id']; ?>" class="btn btn-sm btn-danger">Eliminar</a>
+                            <a href="editar_usuario.php?id=<?php echo htmlspecialchars($usuario['id']); ?>" class="btn btn-sm btn-warning">Editar</a>
+                            <a href="eliminar.php?id=<?php echo htmlspecialchars($usuario['id']); ?>" class="btn btn-sm btn-danger" onclick="return confirm('¿Estás seguro de que deseas eliminar este usuario?');">Eliminar</a>
                         </td>
                     </tr>
                     <?php } ?>

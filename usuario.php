@@ -1,5 +1,6 @@
 <?php
-include 'conexion.php';
+include 'conexion.php'; 
+
 class Usuario {
     private $conexion;
 
@@ -7,29 +8,26 @@ class Usuario {
         $this->conexion = $conexion;
     }
 
-    public function obtenerUnUsuario($id)
-    {
-        // Realiza una consulta SQL
-        $query = "SELECT * FROM usuario where id=".$id."";
-        $resultado = $this->conexion->query($query);
+    // Obtener un solo usuario por su ID
+    public function obtenerUnUsuario($id) {
+        $query = "SELECT * FROM usuario WHERE id = ?";
+        $stmt = $this->conexion->prepare($query);
+        $stmt->bind_param("i", $id);
 
-        if ($resultado)
-         {
+        if ($stmt->execute()) {
+            $resultado = $stmt->get_result();
             $usuario = $resultado->fetch_assoc();
-            $resultado->free(); // Liberar el resultado
+            $stmt->close();
             return $usuario;
-        }
-         else {
-            echo "Error al listar usuarios: " . $this->conexion->error;
+        } else {
+            echo "Error al obtener el usuario: " . $stmt->error;
             return null;
         }
-
-       
     }
+
+    // Listar todos los usuarios
     public function listarUsuarios() {
         $usuarios = array();
-
-        // Realiza una consulta SQL
         $query = "SELECT * FROM usuario";
         $resultado = $this->conexion->query($query);
 
@@ -37,14 +35,14 @@ class Usuario {
             while ($fila = $resultado->fetch_assoc()) {
                 $usuarios[] = $fila;
             }
-            $resultado->free(); // Liberar el resultado
+            $resultado->free();
         } else {
             echo "Error al listar usuarios: " . $this->conexion->error;
         }
-
         return $usuarios;
     }
 
+    // Agregar un nuevo usuario
     public function agregarUsuario($nombre, $direccion, $telefono) {
         $query = "INSERT INTO usuario (nombre, direccion, telefono) VALUES (?, ?, ?)";
         $stmt = $this->conexion->prepare($query);
@@ -58,28 +56,50 @@ class Usuario {
         }
     }
 
+    // Actualizar un usuario existente
     public function actualizarUsuario($id, $nombre, $direccion, $telefono) {
         $query = "UPDATE usuario SET nombre = ?, direccion = ?, telefono = ? WHERE id = ?";
         $stmt = $this->conexion->prepare($query);
         $stmt->bind_param("sssi", $nombre, $direccion, $telefono, $id);
 
         if ($stmt->execute()) {
-            return true;
+            if ($stmt->affected_rows > 0) {
+                $stmt->close();
+                return true;
+            } else {
+                echo "No se actualizó ningún usuario. Verifica si el ID es correcto.";
+                $stmt->close();
+                return false;
+            }
         } else {
             echo "Error al actualizar usuario: " . $stmt->error;
+            $stmt->close();
             return false;
         }
     }
 
-    public function eliminarUsuario($id) {
+       // Eliminar un usuario
+       public function eliminarUsuario($id) {
         $query = "DELETE FROM usuario WHERE id = ?";
         $stmt = $this->conexion->prepare($query);
+        if ($stmt === false) {
+            echo "Error al preparar la consulta: " . $this->conexion->error;
+            return false;
+        }
         $stmt->bind_param("i", $id);
 
         if ($stmt->execute()) {
-            return true;
+            if ($stmt->affected_rows > 0) {
+                $stmt->close();
+                return true;
+            } else {
+                // Si no se encontró el usuario, puedes hacer una redirección o mostrar un mensaje
+                $stmt->close();
+                return false;
+            }
         } else {
             echo "Error al eliminar usuario: " . $stmt->error;
+            $stmt->close();
             return false;
         }
     }

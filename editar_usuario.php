@@ -15,7 +15,7 @@ include 'header.php';
             <h2>Editar Usuario</h2>
         </div>
         <div class="card-body">
-            <form action="procesar_editar_usuario.php" method="post" class="w-75 mx-auto">
+            <form action="procesarUsuario.php" method="post" class="w-75 mx-auto">
                 <input type="hidden" name="id" value="<?php echo $usuario['id']; ?>">
 
                 <div class="mb-3">
